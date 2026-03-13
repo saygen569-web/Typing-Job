@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypeEarn Pro | Admin Review & Approval System</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #00b894;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; }
+        body { background-color: var(--bg); color: #1e293b; padding-bottom: 80px; }
+        .hidden { display: none !important; }
+
+        /* --- UI Elements --- */
+        .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #f1f5f9; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-sm { padding: 8px; font-size: 12px; margin-top: 5px; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1.5px solid #e2e8f0; border-radius: 12px; outline: none; font-size: 15px; background: #fcfdfe; }
+
+        /* --- Header & Nav --- */
+        header { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .logo { font-family: 'Poppins'; font-weight: 800; font-size: 22px; color: var(--primary); }
+        
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 12px 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); z-index: 1000; border-radius: 25px 25px 0 0; }
+        .nav-item { text-align: center; color: #94a3b8; flex: 1; cursor: pointer; font-size: 12px; font-weight: 600; }
+        .nav-item.active { color: var(--primary); }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
+
+        /* --- Dashboard --- */
+        .balance-card { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 30px 20px; border-radius: 25px; text-align: center; margin-bottom: 20px; box-shadow: 0 15px 30px rgba(67, 97, 238, 0.2); }
+        .balance-card h1 { font-size: 38px; font-family: 'Poppins'; margin: 5px 0; }
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .status-active { background: #dcfce7; color: #166534; }
+        .status-pending { background: #fef9c3; color: #854d0e; }
+        .status-inactive { background: #fee2e2; color: #991b1b; }
+
+        /* --- Task --- */
+        .task-img-container { width: 100%; min-height: 200px; background: #f1f5f9; border: 2px dashed #cbd5e1; border-radius: 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 15px; }
+        .task-img-container img { max-width: 100%; max-height: 350px; object-fit: contain; }
+
+        /* --- Admin Panel Overlay --- */
+        #admin-panel { position: fixed; inset: 0; background: #0f172a; color: white; z-index: 2000; padding: 20px; overflow-y: auto; }
+        .admin-card { background: #1e293b; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #334155; }
+        .review-box { background: #334155; padding: 10px; border-radius: 10px; margin-bottom: 10px; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">TypeEarn<span style="color: #4cc9f0;">Pro</span></div>
+        <button onclick="openAdmin()" style="background: #f1f5f9; border: none; padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: bold; cursor: pointer;">অ্যাডমিন</button>
+    </header>
+
+    <div class="container" style="max-width: 500px; margin: auto; padding: 15px;">
+        
+        <!-- Registration Page -->
+        <section id="registration-page">
+            <div class="card">
+                <h2 style="text-align: center; margin-bottom: 20px;">রেজিস্ট্রেশন করুন</h2>
+                <input type="number" id="reg-phone" placeholder="মোবাইল নাম্বার">
+                <input type="email" id="reg-email" placeholder="ইমেইল অ্যাড্রেস">
+                <input type="text" id="reg-dist" placeholder="জেলা">
+                <input type="password" id="reg-pass" placeholder="পাসওয়ার্ড">
+                <input type="password" id="reg-confirm" placeholder="কনফার্ম পাসওয়ার্ড">
+                <button class="btn btn-primary" onclick="handleRegistration()">রেজিস্ট্রেশন করুন</button>
+                <p style="text-align: center; margin-top: 15px; font-size: 14px; color: #64748b;">
+                    ইতিমধ্যে অ্যাকাউন্ট আছে? <a href="#" onclick="showSection('login-page')" style="color: var(--primary); font-weight: bold; text-decoration: none;">লগইন</a>
+                </p>
+            </div>
+        </section>
+
+        <!-- Login Page -->
+        <section id="login-page" class="hidden">
+            <div class="card">
+                <h2 style="text-align: center; margin-bottom: 20px;">লগইন</h2>
+                <input type="number" id="login-phone" placeholder="মোবাইল নাম্বার">
+                <input type="password" id="login-pass" placeholder="পাসওয়ার্ড">
+                <button class="btn btn-primary" onclick="handleLogin()">লগইন করুন</button>
+            </div>
+        </section>
+
+        <!-- Dashboard -->
+        <section id="dashboard-page" class="hidden">
+            <div class="balance-card">
+                <p style="opacity: 0.8; font-size: 14px;">বর্তমান ব্যালেন্স</p>
+                <h1 id="user-balance">৳ ৫০.০০</h1>
+                <div style="margin-top: 10px;">
+                    স্ট্যাটাস: <span id="user-status" class="status-badge status-inactive">Inactive</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>প্যাকেজ ক্রয় (৳ ৩০০)</h3>
+                <p style="font-size: 13px; color: #64748b; margin: 8px 0;">প্যাকেজ কিনলে অ্যাডমিন এপ্রুভ করার পর সরাসরি ৩০০ টাকা ব্যালেন্স অ্যাড হবে।</p>
+                <button class="btn btn-primary" onclick="showSection('payment-page')"><i class="fas fa-gem"></i> প্যাকেজ কিনুন</button>
+            </div>
+
+            <div class="card">
+                <h4 style="margin-bottom: 5px;"><i class="fas fa-tower-broadcast" style="color:red;"></i> লাইভ ফিড</h4>
+                <div id="live-feed" style="font-size: 13px; color: var(--success); font-weight: bold;">বিকাশ পেমেন্ট রিসিভড ৳৩০০ (ID: TE-4921)</div>
+            </div>
+        </section>
+
+        <!-- Typing Work Section -->
+        <section id="task-page" class="hidden">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 id="task-count">টাইপিং কাজ</h3>
+                    <span id="task-info" class="status-badge" style="background: #f1f5f9;">লোড হচ্ছে...</span>
+                </div>
+                
+                <div class="task-img-container" id="task-box">
+                    <img id="current-task-img" src="" alt="Task Image">
+                    <p id="no-task-msg" class="hidden">অ্যাডমিন এখনো কাজ দেয়নি।</p>
+                </div>
+
+                <textarea id="task-input" rows="5" placeholder="ইমেজে যা লেখা আছে নির্ভুলভাবে টাইপ করুন..."></textarea>
+                <button class="btn btn-primary" onclick="submitWorkRequest()" style="background: var(--success);">রিভিউ-তে পাঠান</button>
+            </div>
+        </section>
+
+        <!-- Withdraw Page -->
+        <section id="withdraw-page" class="hidden">
+            <div class="card">
+                <h3>টাকা উত্তোলন</h3>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">মিনিমাম উত্তোলন ৫০০ টাকা।</p>
+                <select id="wd-method">
+                    <option value="bKash">বিকাশ (Personal)</option>
+                    <option value="Nagad">নগদ (Personal)</option>
+                </select>
+                <input type="number" id="wd-amount" placeholder="পরিমাণ (৳)">
+                <input type="number" id="wd-phone" placeholder="নাম্বার">
+                <button class="btn btn-primary" onclick="handleWithdraw()">উইথড্র রিকোয়েস্ট পাঠান</button>
+            </div>
+        </section>
+
+        <!-- Account Section -->
+        <section id="account-page" class="hidden">
+            <div class="card" style="text-align: center;">
+                <h3 id="acc-phone">01304242538</h3>
+                <p id="acc-id" style="color: var(--primary); font-weight: bold; font-size: 14px;">ID: TE-0000</p>
+                <button class="btn btn-primary" onclick="logout()" style="background: var(--danger); margin-top: 25px;"><i class="fas fa-sign-out-alt"></i> লগআউট</button>
+            </div>
+        </section>
+
+        <!-- Payment Page -->
+        <section id="payment-page" class="hidden">
+            <div class="card">
+                <h3>প্যাকেজ পেমেন্ট (৳ ৩০০)</h3>
+                <div style="background: #fff7ed; padding: 15px; border-radius: 12px; border-left: 5px solid #f59e0b; margin: 15px 0;">
+                    <p style="font-size: 14px; font-weight: bold; color: #9a3412;">বিকাশ/নগদ (Personal): 01304242538</p>
+                    <p style="font-size: 12px; color: #c2410c;">টাকা সেন্ডমানি করে আপনার নাম্বার এবং TrxID দিন।</p>
+                </div>
+                <input type="number" id="pay-num" placeholder="আপনার নাম্বার">
+                <input type="text" id="pay-trx" placeholder="Transaction ID (TrxID)">
+                <button class="btn btn-primary" onclick="submitPaymentRequest()">পেমেন্ট রিকোয়েস্ট পাঠান</button>
+            </div>
+        </section>
+
+        <!-- Admin Panel -->
+        <div id="admin-panel" class="hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h2 style="color: #4cc9f0;">Admin Area</h2>
+                <button onclick="closeAdmin()" style="background: var(--danger); color: white; padding: 8px 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;">বন্ধ করুন</button>
+            </div>
+
+            <div class="admin-card">
+                <h4>১. নতুন ইমেজ কাজ আপলোড</h4>
+                <input type="file" id="adm-img-input" accept="image/*" style="margin-top:10px;">
+                <button class="btn btn-primary btn-sm" onclick="adminUploadTask()">ইমেজ পাবলিশ করুন</button>
+            </div>
+
+            <div class="admin-card">
+                <h4>২. টাইপিং রিভিউ</h4>
+                <div id="adm-work-list"></div>
+            </div>
+
+            <div class="admin-card">
+                <h4>৩. পেমেন্ট এপ্রুভাল</h4>
+                <div id="adm-pay-list"></div>
+            </div>
+
+            <div class="admin-card">
+                <h4>৪. উইথড্র লিস্ট</h4>
+                <div id="adm-wd-list"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav hidden" id="bottom-navbar">
+        <div class="nav-item active" onclick="showSection('dashboard-page')"><i class="fas fa-home"></i><span>হোম</span></div>
+        <div class="nav-item" onclick="showSection('task-page')"><i class="fas fa-keyboard"></i><span>কাজ</span></div>
+        <div class="nav-item" onclick="showSection('withdraw-page')"><i class="fas fa-wallet"></i><span>উইথড্র</span></div>
+        <div class="nav-item" onclick="showSection('account-page')"><i class="fas fa-user"></i><span>প্রোফাইল</span></div>
+    </nav>
+
+    <script>
+        let users = JSON.parse(localStorage.getItem('te_final_users')) || [];
+        let tasks = JSON.parse(localStorage.getItem('te_final_tasks')) || [];
+        let withdraws = JSON.parse(localStorage.getItem('te_final_withdraws')) || [];
+        let workReviews = JSON.parse(localStorage.getItem('te_final_reviews')) || [];
+        let sessionPhone = localStorage.getItem('te_final_session') || null;
+
+        function saveData() {
+            localStorage.setItem('te_final_users', JSON.stringify(users));
+            localStorage.setItem('te_final_tasks', JSON.stringify(tasks));
+            localStorage.setItem('te_final_withdraws', JSON.stringify(withdraws));
+            localStorage.setItem('te_final_reviews', JSON.stringify(workReviews));
+        }
+
+        // --- Auth ---
+        function handleRegistration() {
+            const phone = document.getElementById('reg-phone').value;
+            const pass = document.getElementById('reg-pass').value;
+            if(!phone || !pass) return alert("তথ্য দিন");
+            const user = { phone, pass, balance: 50, status: 'inactive', tasksPerformed: 0, id: 'TE-'+Math.floor(1000+Math.random()*9000) };
+            users.push(user);
+            saveData();
+            sessionPhone = phone;
+            localStorage.setItem('te_final_session', phone);
+            initApp();
+        }
+
+        function handleLogin() {
+            const phone = document.getElementById('login-phone').value;
+            const pass = document.getElementById('login-pass').value;
+            const user = users.find(u => u.phone === phone && u.pass === pass);
+            if(user) { sessionPhone = phone; localStorage.setItem('te_final_session', phone); initApp(); }
+            else alert("ভুল তথ্য");
+        }
+
+        function initApp() {
+            document.getElementById('registration-page').classList.add('hidden');
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('bottom-navbar').classList.remove('hidden');
+            showSection('dashboard-page');
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            updateUI();
+        }
+
+        function updateUI() {
+            const user = users.find(u => u.phone === sessionPhone);
+            if(!user) return;
+            document.getElementById('user-balance').innerText = `৳ ${user.balance}.00`;
+            document.getElementById('user-status').innerText = user.status;
+            document.getElementById('acc-phone').innerText = user.phone;
+            document.getElementById('acc-id').innerText = `ID: ${user.id}`;
+
+            const tImg = document.getElementById('current-task-img');
+            if(tasks[user.tasksPerformed]) {
+                tImg.src = tasks[user.tasksPerformed];
+                tImg.classList.remove('hidden');
+                document.getElementById('no-task-msg').classList.add('hidden');
+            } else {
+                tImg.classList.add('hidden');
+                document.getElementById('no-task-msg').classList.remove('hidden');
+            }
+        }
+
+        // --- Admin Password Protect ---
+        function openAdmin() {
+            const pass = prompt("অ্যাডমিন পাসওয়ার্ড দিন:");
+            if(pass === "rofiq1234") {
+                document.getElementById('admin-panel').classList.remove('hidden');
+                renderAdminData();
+            } else {
+                alert("ভুল পাসওয়ার্ড! আপনি অ্যাডমিন নন।");
+            }
+        }
+
+        function closeAdmin() {
+            document.getElementById('admin-panel').classList.add('hidden');
+        }
+
+        // --- Admin Functions ---
+        function adminUploadTask() {
+            const file = document.getElementById('adm-img-input').files[0];
+            if(!file) return alert("ইমেজ সিলেক্ট করুন");
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                tasks.push(e.target.result);
+                saveData();
+                alert("টাস্ক আপলোড সফল!");
+                updateUI();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderAdminData() {
+            const workList = document.getElementById('adm-work-list');
+            workList.innerHTML = workReviews.filter(r => r.status === 'pending').map((r, i) => `
+                <div class="review-box">
+                    User: ${r.phone} <br> Text: ${r.typedText} <br>
+                    <button class="btn btn-primary btn-sm" onclick="approveWork(${i})">এপ্রুভ করুন (৳৮)</button>
+                </div>
+            `).join('');
+
+            const payList = document.getElementById('adm-pay-list');
+            payList.innerHTML = users.filter(u => u.status === 'pending').map(u => `
+                <div class="review-box">
+                    User: ${u.phone} <br> TrxID: ${u.pendingTrx} <br>
+                    <button class="btn btn-primary btn-sm" onclick="approvePay('${u.phone}')">পেমেন্ট এপ্রুভ (৳৩০০)</button>
+                </div>
+            `).join('');
+        }
+
+        function approveWork(index) {
+            const review = workReviews.filter(r => r.status === 'pending')[index];
+            const user = users.find(u => u.phone === review.phone);
+            user.balance += 8;
+            review.status = 'approved';
+            saveData();
+            renderAdminData();
+            alert("৳৮ যোগ করা হয়েছে");
+        }
+
+        function approvePay(phone) {
+            const user = users.find(u => u.phone === phone);
+            user.status = 'active';
+            user.balance += 300;
+            saveData();
+            renderAdminData();
+            alert("প্যাকেজ একটিভ হয়েছে");
+        }
+
+        function submitWorkRequest() {
+            const input = document.getElementById('task-input').value;
+            if(!input) return alert("টাইপ করুন");
+            workReviews.push({ phone: sessionPhone, typedText: input, status: 'pending' });
+            const user = users.find(u => u.phone === sessionPhone);
+            user.tasksPerformed++;
+            saveData();
+            document.getElementById('task-input').value = "";
+            alert("রিভিউতে পাঠানো হয়েছে");
+            updateUI();
+        }
+
+        function submitPaymentRequest() {
+            const trx = document.getElementById('pay-trx').value;
+            const user = users.find(u => u.phone === sessionPhone);
+            user.status = 'pending';
+            user.pendingTrx = trx;
+            saveData();
+            alert("পেমেন্ট রিকোয়েস্ট পাঠানো হয়েছে");
+            showSection('dashboard-page');
+        }
+
+        function handleWithdraw() {
+            const amt = parseInt(document.getElementById('wd-amount').value);
+            const user = users.find(u => u.phone === sessionPhone);
+            if(amt < 500 || amt > user.balance) return alert("ব্যালেন্স নেই");
+            user.balance -= amt;
+            withdraws.push({ phone: sessionPhone, amount: amt, status: 'pending' });
+            saveData();
+            alert("উইথড্র রিকোয়েস্ট সফল");
+            updateUI();
+        }
+
+        function logout() { localStorage.removeItem('te_final_session'); location.reload(); }
+        if(sessionPhone) initApp();
+    </script>
+</body>
+</html>
